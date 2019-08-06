@@ -12,9 +12,9 @@
   "require": {
     "php": ">=7.2",
     "ext-swoole": ">=4.3",
-    "myqee/server": "^2.0",
-    "hyperf/di": "^1.0",
-    "hyperf/server": "^1.0"
+    "myqee/server": "~2.0.0",
+    "hyperf/di": "~1.0.0",
+    "hyperf/server": "~1.0.0"
   },
   "require-dev": {
     "myqee/server": "dev-master"
@@ -32,13 +32,10 @@
     "sort-packages": true
   },
   "extra": {
-    "branch-alias": {
-      "dev-master": "1.0-dev"
-    },
     "hyperf": {
       "config": "MyQEE\\Hyperf\\ConfigProvider"
     }
   },
   "bin": [
   ]
-},
+}
