@@ -12,9 +12,12 @@
   "require": {
     "php": ">=7.2",
     "ext-swoole": ">=4.3",
-    "myqee/server": "~2.0",
-    "hyperf/di": "~1.0",
-    "hyperf/server": "~1.0"
+    "myqee/server": "^2.0",
+    "hyperf/di": "^1.0",
+    "hyperf/server": "^1.0"
+  },
+  "require-dev": {
+    "myqee/server": "dev-master"
   },
   "autoload": {
     "psr-4": {
@@ -38,4 +41,4 @@
   },
   "bin": [
   ]
-}
+},
