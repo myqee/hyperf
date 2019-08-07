@@ -84,16 +84,17 @@ class Config implements ConfigInterface {
                     break;
             }
 
-            $hosts[$name] = [
-                'class' => 'Worker' . ucfirst($name),
-                'type'  => $type,
-                'host'  => $item['host'],
-                'port'  => $item['port'],
-            ];
+            $hosts[$name]         = $item;
+            $hosts[$name]['type'] = $type;
+
+            if (!isset($item['class'])) {
+                $hosts[$name]['class'] = 'Worker' . ucfirst($name);
+            }
         }
         $myqeeConfig['hosts']  = $hosts;
         $myqeeConfig['log']    = $this->getMyQEELogConfig();
-        $myqeeConfig['swoole'] = array_merge($myqeeConfig['swoole'] ?? [], $serverConfig['settings']);
+        $myqeeConfig['swoole'] = array_merge($serverConfig['settings'], $myqeeConfig['swoole'] ?? []);
+        $myqeeConfig['redis']  = array_merge($serverConfig['redis'], $myqeeConfig['redis'] ?? []);
 
         return $myqeeConfig;
     }
@@ -126,7 +127,6 @@ class Config implements ConfigInterface {
 
         if (in_array('-vvv', $argv) || in_array('--dev', $argv)) {
             $rs['level'] = \MyQEE\Server\Logger::TRACE;
-            error_reporting(E_ALL ^ E_NOTICE);
         }
         elseif (in_array('-vv', $argv) || in_array('--debug', $argv)) {
             $rs['level'] = \MyQEE\Server\Logger::DEBUG;

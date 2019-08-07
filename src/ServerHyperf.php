@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace MyQEE\Hyperf;
 
 use Hyperf\Contract\MiddlewareInitializerInterface;
+use Hyperf\Framework\Event\BeforeMainServerStart;
+use Hyperf\Framework\Event\BeforeServerStart;
+use Hyperf\Server\ServerConfig;
+use Hyperf\Server\ServerManager;
 use Hyperf\Server\SwooleEvent;
 use Hyperf\Utils\Context;
 use MyQEE\Server\Server;
@@ -17,6 +21,49 @@ class ServerHyperf extends \Hyperf\Server\Server {
         }
         else {
             return parent::makeServer($type, $host, $port, $mode, $sockType);
+        }
+    }
+
+    protected function initServers(ServerConfig $config) {
+        $servers = $this->sortServers($config->getServers());
+
+        foreach ($servers as $server) {
+            $name = $server->getName();
+            $type = $server->getType();
+            $host = $server->getHost();
+            $port = $server->getPort();
+            $callbacks = $server->getCallbacks();
+
+            if (!$this->server instanceof \Swoole\Server) {
+                $this->server = Server::$instance->server;
+                ServerManager::add($name, [$type, current($this->server->ports)]);
+
+                if (class_exists(BeforeMainServerStart::class)) {
+                    // Trigger BeforeMainEventStart event, this event only trigger once before main server start.
+                    $this->eventDispatcher->dispatch(new BeforeMainServerStart($this->server, $config->toArray()));
+                }
+            } else {
+                $slaveServer = Server::$instance->portListens["$host:$port"] ?? null;
+                if ($slaveServer) {
+                    ServerManager::add($name, [$type, $slaveServer]);
+                }
+                else {
+                    Server::$instance->warn("Not found port: $host:$port");
+                }
+            }
+
+            // Trigger beforeStart event.
+            if (isset($callbacks[SwooleEvent::ON_BEFORE_START])) {
+                [$class, $method] = $callbacks[SwooleEvent::ON_BEFORE_START];
+                if ($this->container->has($class)) {
+                    $this->container->get($class)->{$method}();
+                }
+            }
+
+            if (class_exists(BeforeServerStart::class)) {
+                // Trigger BeforeEventStart event.
+                $this->eventDispatcher->dispatch(new BeforeServerStart($name));
+            }
         }
     }
 
