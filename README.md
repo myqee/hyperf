@@ -1,6 +1,6 @@
 # MyQEE Server For Hyperf
 
-这是一个使得 MyQEE Server 可以兼容使用 Hyperf 的模块 (see https://www.hyperf.io)。Hyperf 是一个在 php7.2 和 swoole 4.4 基础上开发的 PHP 协程框架，具有强大的依赖注入功能以及功能丰富的组件，如果你以前熟悉 Symfory 框架，则会非常容易上手使用。
+这是一个使得 MyQEE Server 可以兼容使用 Hyperf 的模块 (see https://www.hyperf.io )。Hyperf 是一个在 php7.2 和 swoole 4.4 基础上开发的 PHP 协程框架，具有强大的依赖注入功能以及功能丰富的组件，如果你以前熟悉 Laravel、Symfory 等框架，则会非常容易上手使用。
 
 ## 使用方法
 
@@ -23,9 +23,13 @@ MyQEE 相关配置可以放在 `config/autoload/myqee.php` 中，也可放在 `c
 
 ## 差异事项
 
-* 使用DI取代了 hyperf/config 项目；
+* 使用DI兼容处理了 hyperf/config；
 * 使用DI将默认Logger处理设置为了MyQEE的Logger处理方法；
-* 取代了 start 命令；
-* 对于http服务器，使用了一个中间件处理，优先处理 Hyperf 默认的 http 逻辑，若不存在对应路由则使用MyQEE Server默认的路由规则；
+* 取代了 hyperf/server 的 start 命令并保持兼容；
+* 对于http服务器，若使用了 `Hyperf\HttpServer\Server::class, 'onRequest'` 回调（在config/autoload/server.php中默认设置），系统会使用一个中间件处理，优先处理 Hyperf 默认的 http 逻辑，若不存在对应路由则使用MyQEE Server默认的路由规则；
 
 虽然取代了以上功能但是和原来功能保持兼容。
+
+### 更多
+
+可以将原来 MyQEE 用到的配置放在 `config/autoload/myqee.php` 中（不存在，需要自己创建），这样启动时可以自动加载。
