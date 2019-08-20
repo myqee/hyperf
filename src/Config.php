@@ -94,7 +94,7 @@ class Config implements ConfigInterface {
         $myqeeConfig['hosts']  = $hosts;
         $myqeeConfig['log']    = $this->getMyQEELogConfig();
         $myqeeConfig['swoole'] = array_merge($serverConfig['settings'], $myqeeConfig['swoole'] ?? []);
-        $myqeeConfig['redis']  = array_merge($serverConfig['redis'], $myqeeConfig['redis'] ?? []);
+        $myqeeConfig['redis']  = array_merge($this->configs['redis'] ?? [], $myqeeConfig['redis'] ?? []);
 
         return $myqeeConfig;
     }
