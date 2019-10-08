@@ -76,7 +76,7 @@ class Config implements ConfigInterface {
                 case Server::SERVER_HTTP:
                     $type = 'http';
                     break;
-                case Server::SERVER_TCP:
+                case Server::SERVER_BASE:
                     $type = 'tcp';
                     break;
                 default:
