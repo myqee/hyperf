@@ -20,11 +20,11 @@ class ConfigProvider {
                 StdoutLoggerInterface::class  => Logger::class,
                 WorkerStartCallback::class    => Framework\Bootstrap\WorkerStartCallback::class,
             ],
-            'commands' => [
-            ],
-            'scan' => [
-                'paths' => [
-                    __DIR__,
+            'annotations' => [
+                'scan' => [
+                    'paths' => [
+                        __DIR__,
+                    ],
                 ],
             ],
         ];

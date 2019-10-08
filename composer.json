@@ -11,14 +11,14 @@
   ],
   "require": {
     "php": ">=7.2",
-    "ext-swoole": ">=4.3",
+    "ext-swoole": ">=4.4",
     "myqee/server": "~2.0.0",
-    "hyperf/di": "~1.0.0",
-    "hyperf/config": "~1.0.0",
-    "hyperf/command": "~1.0.0",
-    "hyperf/logger": "~1.0.0",
-    "psr/http-server-middleware": "~1.0.0",
-    "hyperf/server": "~1.0.0"
+    "hyperf/di": "~1.1.0",
+    "hyperf/config": "~1.1.0",
+    "hyperf/command": "~1.1.0",
+    "hyperf/logger": "~1.1.0",
+    "hyperf/server": "~1.1.0",
+    "psr/http-server-middleware": "~1.0.0"
   },
   "require-dev": {
     "myqee/server": "dev-master"

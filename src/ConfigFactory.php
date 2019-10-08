@@ -4,12 +4,18 @@ declare(strict_types = 1);
 
 namespace MyQEE\Hyperf;
 
+use Dotenv\Dotenv;
 use Hyperf\Config\ProviderConfig;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 
 class ConfigFactory {
     public function __invoke(ContainerInterface $container) {
+        // Load env before config.
+        if (file_exists(BASE_PATH . '/.env')) {
+            Dotenv::create([BASE_PATH])->load();
+        }
+
         $configPath     = BASE_PATH . '/config/';
         $config         = $this->readConfig($configPath . 'config.php');
         $autoloadConfig = $this->readPaths([$configPath . 'autoload']);
@@ -36,7 +42,6 @@ class ConfigFactory {
         if (file_exists($configPath) && is_readable($configPath)) {
             $config = require $configPath;
         }
-
         return is_array($config) ? $config : [];
     }
 
@@ -49,7 +54,6 @@ class ConfigFactory {
                 $file->getBasename('.php') => require $file->getRealPath(),
             ];
         }
-
         return $configs;
     }
 }
