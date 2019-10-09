@@ -65,6 +65,17 @@ class Config implements ConfigInterface {
         $myqeeConfig  = $this->configs['myqee'] ?? [];
         $serverConfig = $this->configs['server'];
 
+        $merge = function(& $arr1, $arr2) use (& $merge) {
+            foreach ($arr2 as $k => $v) {
+                if (is_array($v) && isset($arr1[$k]) && is_array($arr1[$k])) {
+                    $merge($arr1[$k], $v);
+                }
+                else {
+                    $arr1[$k] = $v;
+                }
+            }
+        };
+
         $hosts = $myqeeConfig['hosts'] ?? [];
         foreach ($serverConfig['servers'] as $item) {
             $name = $item['name'];
@@ -84,8 +95,9 @@ class Config implements ConfigInterface {
                     break;
             }
 
-            $hosts[$name]         = $item;
-            $hosts[$name]['type'] = $type;
+            $item['type'] = $type;
+            $merge($item, $hosts[$name] ?? []);
+            $hosts[$name] = $item;
 
             if (!isset($item['class'])) {
                 $hosts[$name]['class'] = 'Worker' . ucfirst($name);
