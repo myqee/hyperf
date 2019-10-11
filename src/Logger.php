@@ -5,9 +5,7 @@ declare(strict_types = 1);
 
 namespace MyQEE\Hyperf;
 
-use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
-use \MyQEE\Server\Logger as MyQEELogger;
 
 /**
  * Default logger for logging server start and requests.
@@ -15,19 +13,16 @@ use \MyQEE\Server\Logger as MyQEELogger;
  * message. Priority is ignored.
  */
 class Logger implements StdoutLoggerInterface {
-    protected $logger;
-
     use \MyQEE\Server\Traits\Log;
 
-    public function __construct(ConfigInterface $config) {
-        MyQEELogger::init($config->getMyQEELogConfig());
-        $this->logger = MyQEELogger::instance();
+    public function __construct() {
+
     }
 
     /**
      * {@inheritdoc}
      */
     public function log($level, $message, array $context = []) {
-        $this->logger->log($level, $message, $context);
+        \MyQEE\Server\Logger::instance()->addRecord(\MyQEE\Server\Logger::NOTICE, $message, $context);
     }
 }

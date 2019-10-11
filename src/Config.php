@@ -6,7 +6,6 @@ namespace MyQEE\Hyperf;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Server\Server;
-use Hyperf\Server\SwooleEvent;
 use Hyperf\Utils\Arr;
 
 class Config implements ConfigInterface {
@@ -133,37 +132,10 @@ class Config implements ConfigInterface {
             }
         }
 
-        $MyQEEConfig['servers'] = $servers;
-        $MyQEEConfig['redis']   = $this->configs['redis'] = array_merge($this->configs['redis'] ?? [], $MyQEEConfig['redis'] ?? []);
-        $MyQEEConfig['swoole']  = $hyServerConfig['settings'] = array_merge($hyServerConfig['settings'], $MyQEEConfig['swoole'] ?? []);
-        $MyQEEConfig['log']     = $this->getMyQEELogConfig();
-
+        $MyQEEConfig['servers']  = $servers;
+        $MyQEEConfig['redis']    = $this->configs['redis'] = array_merge($this->configs['redis'] ?? [], $MyQEEConfig['redis'] ?? []);
+        $MyQEEConfig['swoole']   = $hyServerConfig['settings'] = array_merge($hyServerConfig['settings'], $MyQEEConfig['swoole'] ?? []);
         $this->configs['server'] = $hyServerConfig;
         $this->configs['myqee']  = $MyQEEConfig;
-    }
-
-    /**
-     * 获取日志配置
-     *
-     * @return array
-     */
-    public function getMyQEELogConfig() {
-        $logConfig = $this->configs['myqee']['log'] ?? [];
-
-        return array_merge_recursive([
-            'level'         => \MyQEE\Server\Logger::INFO,
-            'stdout'        => false,
-            'path'          => false,
-            'withFilePath'  => true,
-            'loggerProcess' => false,
-            'active'        => [
-                'sizeLimit' => 0,
-                'timeLimit' => false,
-                'timeKey'   => null,
-                'compress'  => false,
-                'prefix'    => 'active.',
-                'path'      => null,
-            ],
-        ], $logConfig);
     }
 }
