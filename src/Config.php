@@ -6,6 +6,7 @@ namespace MyQEE\Hyperf;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Server\Server;
+use Hyperf\Server\SwooleEvent;
 use Hyperf\Utils\Arr;
 
 class Config implements ConfigInterface {
@@ -57,13 +58,33 @@ class Config implements ConfigInterface {
     }
 
     /**
-     * 获取供MyQEE服务器使用的配置
+     * 初始化配置并生效
      *
-     * @return array
+     * 初始化后，数组的 myqee 将被替换成 \MyQEE\Server\Config 对象
      */
-    public function getMyQEEConfig() {
-        $myqeeConfig  = $this->configs['myqee'] ?? [];
-        $serverConfig = $this->configs['server'];
+    public function setup() {
+        $this->syncServersConfig();
+
+        $config = \MyQEE\Server\Config::create($this->configs['myqee']);
+        $this->configs['myqee']  = $config;
+
+        $config->initConfig();
+        $config->effectiveConfig();
+    }
+
+    /**
+     * 同步 myqee 配置和 hyperf 中配置相同部分的参数（比如 servers mode 等）
+     */
+    public function syncServersConfig() {
+        $MyQEEConfig     = $this->configs['myqee'] ?? [];
+        $hyServerConfig = $this->configs['server'] ?? ['settings' => [], 'servers' => []];
+
+        if (isset($hyServerConfig['mode'])) {
+            $MyQEEConfig['mode'] = $hyServerConfig['mode'];
+        }
+        elseif (isset($MyQEEConfig['mode'])) {
+            $hyServerConfig['mode'] = $MyQEEConfig['mode'];
+        }
 
         $merge = function(& $arr1, $arr2) use (& $merge) {
             foreach ($arr2 as $k => $v) {
@@ -76,39 +97,49 @@ class Config implements ConfigInterface {
             }
         };
 
-        $hosts = $myqeeConfig['hosts'] ?? [];
-        foreach ($serverConfig['servers'] as $item) {
+        $typeMap = [
+            'ws'   => Server::SERVER_WEBSOCKET,
+            'http' => Server::SERVER_HTTP,
+            'tcp'  => Server::SERVER_BASE,
+        ];
+        $typeMapFlip = array_flip($typeMap);
+
+        $servers = $MyQEEConfig['servers'] ?? [];
+        $tmpHyServerNameIndex = [];
+        foreach ($hyServerConfig['servers'] as $index => $item) {
             $name = $item['name'];
+            $tmpHyServerNameIndex[$name] = $index;
 
-            switch ($item['type']) {
-                case Server::SERVER_WEBSOCKET:
-                    $type = 'ws';
-                    break;
-                case Server::SERVER_HTTP:
-                    $type = 'http';
-                    break;
-                case Server::SERVER_BASE:
-                    $type = 'tcp';
-                    break;
-                default:
-                    $type = $item['type'];
-                    break;
-            }
-
-            $item['type'] = $type;
-            $merge($item, $hosts[$name] ?? []);
-            $hosts[$name] = $item;
+            $item['type'] = $typeMapFlip[$item['type']] ?? $item['type'];
+            $merge($item, $servers[$name] ?? []);
+            $servers[$name] = $item;
 
             if (!isset($item['class'])) {
-                $hosts[$name]['class'] = 'Worker' . ucfirst($name);
+                $servers[$name]['class'] = 'Worker' . ucfirst($name);
             }
         }
-        $myqeeConfig['hosts']  = $hosts;
-        $myqeeConfig['log']    = $this->getMyQEELogConfig();
-        $myqeeConfig['swoole'] = array_merge($serverConfig['settings'], $myqeeConfig['swoole'] ?? []);
-        $myqeeConfig['redis']  = array_merge($this->configs['redis'] ?? [], $myqeeConfig['redis'] ?? []);
 
-        return $myqeeConfig;
+        foreach ($servers as $name => $item) {
+            if (!isset($tmpHyServerNameIndex[$name])) {
+                // 将 servers 中服务器赋值过去
+                $hyServerConfig[] = [
+                    'name'      => $name,
+                    'type'      => $typeMap[$item['type']] ?? Server::SERVER_BASE,
+                    'host'      => $item['host'],
+                    'port'      => $item['port'],
+                    'sock_type' => SWOOLE_SOCK_TCP,
+                    'callbacks' => [],
+                ];
+            }
+        }
+
+        $MyQEEConfig['servers'] = $servers;
+        $MyQEEConfig['redis']   = $this->configs['redis'] = array_merge($this->configs['redis'] ?? [], $MyQEEConfig['redis'] ?? []);
+        $MyQEEConfig['swoole']  = $hyServerConfig['settings'] = array_merge($hyServerConfig['settings'], $MyQEEConfig['swoole'] ?? []);
+        $MyQEEConfig['log']     = $this->getMyQEELogConfig();
+
+        $this->configs['server'] = $hyServerConfig;
+        $this->configs['myqee']  = $MyQEEConfig;
     }
 
     /**
@@ -119,7 +150,7 @@ class Config implements ConfigInterface {
     public function getMyQEELogConfig() {
         $logConfig = $this->configs['myqee']['log'] ?? [];
 
-        $rs = array_merge([
+        return array_merge_recursive([
             'level'         => \MyQEE\Server\Logger::INFO,
             'stdout'        => false,
             'path'          => false,
@@ -134,19 +165,5 @@ class Config implements ConfigInterface {
                 'path'      => null,
             ],
         ], $logConfig);
-
-        global $argv;
-
-        if (in_array('-vvv', $argv) || in_array('--dev', $argv)) {
-            $rs['level'] = \MyQEE\Server\Logger::TRACE;
-        }
-        elseif (in_array('-vv', $argv) || in_array('--debug', $argv)) {
-            $rs['level'] = \MyQEE\Server\Logger::DEBUG;
-        }
-        elseif (in_array('-v', $argv)) {
-            $rs['level'] = \MyQEE\Server\Logger::INFO;
-        }
-
-        return $rs;
     }
 }

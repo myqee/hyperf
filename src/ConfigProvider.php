@@ -10,8 +10,8 @@ use Hyperf\Framework\Bootstrap\WorkerStartCallback;
 
 class ConfigProvider {
     public function __invoke(): array {
-        if (!defined('\\BASE_DIR')) {
-            define('\\BASE_DIR', (defined('\\BASE_PATH') ? BASE_PATH : dirname(__DIR__, 4)) .'/');
+        if (!defined('BASE_DIR')) {
+            define('BASE_DIR', (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 4)) .DIRECTORY_SEPARATOR);
         }
 
         return [

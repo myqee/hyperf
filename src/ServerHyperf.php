@@ -48,7 +48,7 @@ class ServerHyperf extends \Hyperf\Server\Server {
                     ServerManager::add($name, [$type, $slaveServer]);
                 }
                 else {
-                    Server::$instance->warn("Not found port: $host:$port");
+                    $this->logger->warning("Not found port: $host:$port");
                 }
             }
 
@@ -106,7 +106,7 @@ class ServerHyperf extends \Hyperf\Server\Server {
                     Server::$instance->event->on('workerStart', function($server, $workerId) use ($event, $callback, $serverName) {
                         $worker = Server::$instance->workers[$serverName] ?? null;
                         if (!$worker) {
-                            Server::$instance->warn("worker name not found: {$serverName}");
+                            $this->logger->warning("worker name not found: {$serverName}");
                             return;
                         }
                         /**

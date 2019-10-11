@@ -21,19 +21,6 @@ class ConfigFactory {
         $autoloadConfig = $this->readPaths([$configPath . 'autoload']);
         $merged         = array_merge_recursive(ProviderConfig::load(), $config, ...$autoloadConfig);
 
-        if (isset($merged['myqee']['php']) && is_array($merged['myqee']['php'])) {
-            $phpConfig = $merged['myqee']['php'];
-            if (isset($phpConfig['error_reporting'])) {
-                error_reporting($phpConfig['error_reporting']);
-            }
-            if (isset($phpConfig['timezone'])) {
-                date_default_timezone_set($phpConfig['timezone']);
-            }
-            if (isset($phpConfig['memory_limit'])) {
-                ini_set('memory_limit', $phpConfig['memory_limit']);
-            }
-        }
-
         return new Config($merged);
     }
 

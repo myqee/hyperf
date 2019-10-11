@@ -15,20 +15,12 @@ use \MyQEE\Server\Logger as MyQEELogger;
  * message. Priority is ignored.
  */
 class Logger implements StdoutLoggerInterface {
-    /**
-     * @var \MyQEE\Hyperf\Config
-     */
-    private $config;
-
     protected $logger;
 
     use \MyQEE\Server\Traits\Log;
 
     public function __construct(ConfigInterface $config) {
-        $this->config = $config;
-        $logConfig    = $this->config->getMyQEELogConfig();
-
-        MyQEELogger::init($logConfig);
+        MyQEELogger::init($config->getMyQEELogConfig());
         $this->logger = MyQEELogger::instance();
     }
 
