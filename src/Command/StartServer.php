@@ -99,8 +99,6 @@ class StartServer extends SymfonyCommand {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-        \Swoole\Runtime::enableCoroutine(true);
-
         $this->parseOption($input);
 
         /**
