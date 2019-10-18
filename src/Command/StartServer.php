@@ -16,18 +16,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @Command
  */
-class StartServer extends SymfonyCommand
-{
+class StartServer extends SymfonyCommand {
     /**
      * @var ContainerInterface
      */
-    private $container;
-    
+    protected $container;
+
+    /**
+     * @var ConfigInterface
+     */
+    protected $config;
+
     protected $description = 'Start the server.';
 
-    public function __construct(ContainerInterface $container) {
+    public function __construct(ContainerInterface $container, ConfigInterface $config) {
         parent::__construct('start');
         $this->container = $container;
+        $this->config    = $config;
     }
 
     protected function configure() {
@@ -43,11 +48,7 @@ class StartServer extends SymfonyCommand
     }
 
     protected function parseOption(InputInterface $input) {
-        /**
-         * @var $configFactory \MyQEE\Hyperf\Config
-         */
-        $configFactory = $this->container->get(ConfigInterface::class);
-        $config = $configFactory->get('myqee');
+        $config = $this->config->get('myqee');
 
         $log = $input->getOption('log');
         if ($log) {
@@ -94,7 +95,7 @@ class StartServer extends SymfonyCommand
             $config['worker_num'] = $config['swoole']['worker_num'] = $workerNum;
         }
 
-        $configFactory->set('myqee', $config);
+        $this->config->set('myqee', $config);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {

@@ -100,6 +100,7 @@ class Config implements ConfigInterface {
             'ws'   => Server::SERVER_WEBSOCKET,
             'http' => Server::SERVER_HTTP,
             'tcp'  => Server::SERVER_BASE,
+            'tls'  => Server::SERVER_BASE,
         ];
         $typeMapFlip = array_flip($typeMap);
 
@@ -121,7 +122,7 @@ class Config implements ConfigInterface {
         foreach ($servers as $name => $item) {
             if (!isset($tmpHyServerNameIndex[$name])) {
                 // 将 servers 中服务器赋值过去
-                $hyServerConfig[] = [
+                $hyServerConfig['servers'][] = [
                     'name'      => $name,
                     'type'      => $typeMap[$item['type']] ?? Server::SERVER_BASE,
                     'host'      => $item['host'],
