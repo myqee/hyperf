@@ -99,8 +99,8 @@ class Config implements ConfigInterface {
         $typeMap = [
             'ws'   => Server::SERVER_WEBSOCKET,
             'http' => Server::SERVER_HTTP,
-            'tcp'  => Server::SERVER_BASE,
             'tls'  => Server::SERVER_BASE,
+            'tcp'  => Server::SERVER_BASE,
         ];
         $typeMapFlip = array_flip($typeMap);
 
@@ -112,6 +112,12 @@ class Config implements ConfigInterface {
 
             $item['type'] = $typeMapFlip[$item['type']] ?? $item['type'];
             $merge($item, $servers[$name] ?? []);
+
+            if ($item['type'] == 'tcp' && isset($item['conf']['ssl_cert_file']) && $item['conf']['ssl_cert_file']) {
+                # 配证书
+                $item['type'] = 'tls';
+            }
+
             $servers[$name] = $item;
 
             if (!isset($item['class'])) {
