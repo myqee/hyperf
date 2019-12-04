@@ -98,6 +98,11 @@ class StartServer extends SymfonyCommand {
         $this->config->set('myqee', $config);
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $this->parseOption($input);
 
@@ -111,5 +116,7 @@ class StartServer extends SymfonyCommand {
 
         # 服务启动
         $serverFactory->start();
+        
+        return 0;
     }
 }
