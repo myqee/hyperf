@@ -21,7 +21,7 @@ class ServerHyperfFactory extends ServerFactory {
         # 创建 Hyperf 服务器
         $this->getServer();
 
-        \Swoole\Runtime::enableCoroutine(true, swoole_hook_flags());
+        \Swoole\Runtime::enableCoroutine();
 
         # 启动 swoole 服务器
         $this->myqeeServer->server->start();
